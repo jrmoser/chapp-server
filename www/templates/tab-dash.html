@@ -1,0 +1,49 @@
+<ion-view view-title="Chapp">
+  <ion-content class="padding">
+    <h2>Welcome to Chapp!<img src="img/octopusInTophat.jpg" style="max-height: 65px; max-width: 65px; border-radius: 50%;"> </h2>
+
+    <p>
+      A fantastic chat application made by Jarod, Zach, and Evan using <img src="img/ionic-logo.png" style="max-height: 75px; max-width: 75px;">
+      and <img src="img/firebase-logo.jpg" style="max-height: 75px; max-width: 75px;">.
+    </p>
+
+    <p>
+     This is a high-brow chat application for nice chaps. Feel free to browse our
+      <a href="https://github.com/jrmoser/chapp">github repository</a>.
+    </p>
+    <p>
+      Here's some gentlemanly things to get you started:<br>
+      <h4>Tom Selleck's Mustache</h4>
+    <img src="img/TomSelleck.jpg" style="max-height: 100px; max-width: 100px;">
+    <h4>Bartitsu</h4>
+    <img src="img/Bartitsu.jpg" style="max-height: 100px; max-width: 100px;">
+    <h4>This Guy</h4>
+    <img src="img/Boxing-Tradition-Rules-01.jpg" style="max-height: 100px; max-width: 100px;">
+    <h4>These Things</h4>
+    <img src="img/PocketSquare.jpg" style="max-height: 100px; max-width: 100px;">
+    </p>
+
+    <div class="list card">
+      <div class="item item-divider">
+        PREVIEW
+      </div>
+      <div class="item item-avatar">
+        <img src="img/octopusInTophat.jpg">
+
+        <h2>General Chat Window</h2>
+
+        <p>What's happening now in Gen Chat</p>
+      </div>
+      <div class="item item-body">
+        <ion-list ng-repeat="message in dc.messages | limitTo: -10">
+          <div>
+            {{message.content}}</div>
+        </ion-list>
+
+      </div>
+      <div class="item item-divider">
+        <p>"There are <span>{{fb.userData.length}}</span> people in the Gen Chat"</p>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

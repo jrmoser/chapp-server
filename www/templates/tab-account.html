@@ -1,0 +1,125 @@
+<ion-view view-title="Account" cache-view="false">
+  <ion-content>
+    <!--Login-->
+    <div ng-if="ac.state == 'login'">
+      <div class="bar">
+        <h1 class="title">Login</h1>
+      </div>
+      <br><br>
+
+      <form name="loginForm" ng-submit="ac.login(loginemail, loginpassword)">
+        <ion-list>
+          <div class="list">
+            <label class="item item-input item-floating-label">
+              <span class="input-label">Email</span>
+              <input id="loginemail" name="loginemail" class="form-control" required type="email" placeholder="Email"
+                     validateEmail ng-model="loginemail">
+              <span class="assertive" ng-if="(loginForm.loginemail.$touched || loginForm.$submitted) && !loginemail">Valid email is required</span>
+            </label>
+            <label class="item item-input item-floating-label">
+              <span class="input-label">Password</span>
+              <input id="loginpassword" name="loginpassword" class="form-control" type="password" placeholder="Password"
+                     ng-model="loginpassword">
+              <span class="assertive"
+                    ng-if="(loginForm.loginpassword.$touched || loginForm.$submitted) && !loginpassword">Password is required</span>
+
+              <div class="assertive" ng-if="ac.loginError" id="loginError">{{ac.errorMessage}}</div>
+            </label>
+
+          </div>
+          <button ng-disabled="!loginemail || !loginpassword" class="button button-full button-positive">
+            Submit
+          </button>
+        </ion-list>
+      </form>
+      <div class="button button-full" ng-click="ac.FBlogin()" style="background-color: #3b5998; color: white">
+        <i class="ion-social-facebook" style="font-size: large"></i>
+        Log in with Facebook
+      </div>
+      <div class="button button-full button-assertive" ng-click="ac.Googlelogin()">
+        <i class="ion-social-google" style="font-size: large"></i>
+        Log in with Google
+      </div>
+      <div class="button button-full button-balanced" ng-click="ac.togglereg()">Create an account</div>
+    </div>
+
+    <!--Register User-->
+    <div ng-if="ac.state == 'reg'">
+      <div class="bar">
+        <h1 class="title">New User</h1>
+      </div>
+      <br><br>
+
+      <form name="regForm"
+            ng-submit="ac.register(firstname, lastname, registeremail, registerusername, registerpassword)">
+        <ion-list>
+          <label class="item item-input item-floating-label">
+            <span class="input-label">First Name</span>
+            <input id="firstname" name="firstname" class="form-control" type="text" placeholder="First Name"
+                   ng-model="firstname">
+            <span class="assertive" ng-if="(regForm.firstname.$touched || regForm.$submitted) && !firstname">First name is required</span>
+          </label>
+          <label class="item item-input item-floating-label">
+            <span class="input-label">Last Name</span>
+            <input id="lastname" name="lastname" class="form-control" type="text" placeholder="Last Name"
+                   ng-model="lastname">
+            <span class="assertive" ng-if="(regForm.lastname.$touched || regForm.$submitted) && !lastname">Last name is required</span>
+          </label>
+          <label class="item item-input item-floating-label">
+            <span class="input-label">Email</span>
+            <input id="registeremail" name="registeremail" class="form-control" type="email" placeholder="Email"
+                   validateEmail ng-model="registeremail">
+            <!--<span class="assertive" ng-if="(regForm.registeremail.$touched || regForm.$submitted) && registeremail.$invalid">Invalid email</span>-->
+            <span class="assertive" ng-if="(regForm.registeremail.$touched || regForm.$submitted) && !registeremail">Valid email is required</span>
+          </label>
+          <label class="item item-input item-floating-label">
+            <span class="input-label">Username</span>
+            <input id="registersuername" name="registerusername" class="form-control" type="text" placeholder="Username"
+                   ng-model="registerusername">
+            <span class="assertive"
+                  ng-if="(regForm.registerusername.$touched || regForm.$submitted) && !registerusername">Username is required</span>
+          </label>
+          <label class="item item-input item-floating-label">
+            <span class="input-label">Password</span>
+            <input name="registerpassword" type="password" placeholder="Password" ng-model="registerpassword">
+            <span class="assertive"
+                  ng-if="(regForm.registerpassword.$touched || regForm.$submitted) && !registerpassword">Password is required</span>
+
+            <div class="assertive" ng-if="ac.registerError" id="registerError">{{ac.errorMessage}}</div>
+          </label>
+
+          <button ng-disabled="!firstname || !lastname || !registeremail || !registerusername || !registerpassword"
+                  class="button button-full button-positive">
+            Submit
+          </button>
+      </form>
+      <div class="button button-balanced button-full" ng-click="ac.togglereg()">Already have an account? Click here to
+        sign in.
+      </div>
+    </div>
+    </ion-list>
+
+    <!--Log out -->
+    <div ng-if="ac.state == 'loggedin'">
+      <div class="bar">
+        <h1 class="title">Log Out</h1>
+      </div>
+      <div class="bar bar-header">
+        <h1 class="title">Logged in as {{ac.username}}</h1>
+      </div>
+      <br id="ZACH WAS HERE">
+      <br>
+      <div class="row">
+        <div class="col"></div>
+        <div class="col"><img ng-src="{{ac.profilePic}}" height="250px"></div>
+        <div class="col"></div>
+      </div>
+      <form>
+        <ion-list>
+          <button class="button button-assertive button-full" ng-click="ac.logout()">Click here to log out</button>
+        </ion-list>
+      </form>
+    </div>
+
+  </ion-content>
+</ion-view>

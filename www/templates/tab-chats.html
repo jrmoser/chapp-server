@@ -1,0 +1,43 @@
+<ion-view view-title="Chats" cache-view="false">
+
+  <!--show when logged in-->
+  <ion-content ng-hide="cc.loggedIn == ''">
+    <ion-list>
+      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="room in cc.chatRooms"
+                type="item-text-wrap" href="#/tab/chats/{{room.name}}">
+        <img ng-src="{{room.face}}">
+        <h2>{{room.name}}</h2>
+        <p>{{room.desc}}</p>
+        <i class="icon ion-chevron-right icon-accessory"></i>
+
+        <!--<button class="button button-assertive" ng-click="remove(chat)">-->
+        <!--Delete-->
+        <!--</button>-->
+      </ion-item>
+    </ion-list>
+
+  </ion-content>
+  <ion-footer-bar align-title="center" class="bar-balanced" ng-click="cc.addRoomPopup()"  ng-hide="cc.loggedIn == ''">
+    <a class="title" href="#" style="text-decoration: none">
+      Add chat room
+    </a>
+  </ion-footer-bar>
+
+  <!--show when not logged in-->
+  <ion-content ng-show="cc.loggedIn == ''">
+    <h1 class="assertive">Please <a href="#/tab/account">log in</a> to take part in our converations</h1>
+  </ion-content>
+
+  <!--html for the popup-->
+  <script id="add-chat-room.html" type="text/ng-template">
+    <div class="item-input item-floating-label">
+      <span class="input-label">Name</span>
+      <input type="text" placeholder="Name" ng-model="cc.name" required>
+    </div>
+    <div class="item-input item-floating-label">
+      <span class="input-label">Description</span>
+      <input type="text" placeholder="Description" ng-model="cc.desc" required>
+    </div>
+  </script>
+
+</ion-view>

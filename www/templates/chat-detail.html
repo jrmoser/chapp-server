@@ -1,0 +1,43 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view cache-view="false">
+  <ion-nav-title>{{cdc.room.name}}</ion-nav-title>
+  <!--logged in view-->
+  <ion-content class="padding" ng-hide="cdc.loggedIn == ''">
+    <img class="col col-33 col-offset-33" ng-src="{{cdc.room.face}}">
+    <h3 style="text-align: center" >
+      {{cdc.room.desc}}
+    </h3>
+    <div class="row row-center" ng-repeat="message in cdc.messages" ng-class="{ 'dark' : message.from === 'me' }"
+         set-focus="$last">
+      <img style="border-radius: 50%" ng-src="{{message.profilePic}}" alt="avatar" width="50px">
+      <div class="col">{{message.from}} (<span am-time-ago="message.timeStamp"></span>): <span
+        ng-bind-html="message.content | linky:'_blank'"></span>
+      </div>
+    </div>
+    <br>
+  </ion-content>
+  <ion-footer-bar class="item-input-inset" ng-hide="cdc.loggedIn == ''">
+    <label class="item-input-wrapper">
+      <i class="icon placeholder-icon ion-chatbubble" ng-class="{'ion-chatbubble-working' : cdc.message}"></i>
+      <input type="text"
+             placeholder="Message"
+             ng-model="cdc.message"
+             ng-keypress="$event.which == 13 ? cdc.send(cdc.message) : null;">
+    </label>
+    <button class="button button-clear" ng-click="cdc.send(cdc.message)">
+      Send
+    </button>
+    <!--<input type="file" name="file" onchange="angular.element(this).scope().uploadFile(this.files)"/>-->
+  </ion-footer-bar>
+
+  <!--show when not logged in-->
+  <ion-content ng-show="cdc.loggedIn == ''">
+    <h1 class="bar-assertive">Please <a href="#/tab/account">log in</a> to take part in our converations</h1>
+  </ion-content>
+
+</ion-view>
