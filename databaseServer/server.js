@@ -22,18 +22,6 @@ var findRooms = function(db, callback) {
   });
 };
 
-var removeMovie = function(db, movie, callback) {
-  db.collection('movies').deleteOne({
-      "title": movie
-    },
-    function(err, result) {
-      assert.equal(err, null);
-      assert.equal(1, result.result.n);
-      callback();
-    }
-  );
-};
-
 var addRoom = function(db, room, callback) {
   db.collection('rooms').insertOne(room, function(err, result) {
     assert.equal(err, null);
