@@ -9,7 +9,7 @@ var url = 'mongodb://54.186.218.180:27017';
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-app.use('/', express.static(__dirname + '/client'));
+app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
 var findRooms = function(db, callback) {
