@@ -48,10 +48,10 @@ var find = function(db, collection, room, callback) {
   });
 };
 
-var add = function(db, type, data, callback) {
-  db.collection(type).insertOne(data, function(err, result) {
+var add = function(db, collection, data, callback) {
+  db.collection(collection).insertOne(data, function(err, result) {
     assert.equal(err, null);
-    console.log(`Inserted data into the ${type} collection.`);
+    console.log(`Inserted data into the ${collection} collection.`);
     callback();
   });
 };
