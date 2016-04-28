@@ -66,6 +66,19 @@ app.get('/api/rooms', (req, res) => {
   });
 });
 
+app.get('/api/room:room', (req, res) => {
+  var currRoom = {
+    name: req.params.room.slice(1)
+  };
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    find(db, 'rooms', currRoom, function(data) {
+      res.json(data).end();
+      db.close();
+    });
+  });
+});
+
 app.get('/api/messages:room', (req, res) => {
   var currRoom = {
     room: req.params.room.slice(1)

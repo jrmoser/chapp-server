@@ -14,8 +14,14 @@
     var cdc = this;
     cdc.send = send;
     cdc.loggedIn = firebaseData.loggedInUser.username;
-    cdc.messages = firebaseData.getCurrentMessages();
-    cdc.room = firebaseData.getCurrentRoom();
+
+//uses promises to get the current data on load of the controller
+    firebaseData.getCurrentMessages().then(function(res){
+      cdc.messages = res;
+    });
+    firebaseData.getCurrentRoom().then(function(res){
+      cdc.room = res[0];
+    });
 
     function send(message) {
       if (cdc.message) {
