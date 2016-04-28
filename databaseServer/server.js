@@ -40,8 +40,9 @@ io.on('connection', function(socket) {
   });
 });
 
-var find = function(db, type, room, callback) {
-  db.collection(type).find(room).toArray(function(err, docs) {
+
+var find = function(db, collection, room, callback) {
+  db.collection(collection).find(room).toArray(function(err, docs) {
     assert.equal(err, null);
     callback(docs);
   });
