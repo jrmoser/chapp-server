@@ -47,17 +47,20 @@
         content: message,
         timeStamp: new Date().getTime(),
         from: fb.loggedInUser.username,
+        room: activeRoom(),
         profilePic: fb.loggedInUser.profilePic
       });
     }
 
     function addRoom(name, desc) {
-      fb.objectRef.rooms[name] = {
+     var data = {
         name: name,
         desc: desc,
         face: avatarGen()
       };
-      fb.objectRef.$save();
+      $http.post('localhost:5000/api/messages', data).success(function (res, data){
+        socket.emit('room added');
+      });
     }
 
     function getCurrentMessages() {
