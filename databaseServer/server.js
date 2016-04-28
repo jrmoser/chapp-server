@@ -18,7 +18,7 @@ app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
 
 io.on('connection', function (socket) {
-  console.log("socket opened")
+  console.log("socket opened");
 });
 
 
