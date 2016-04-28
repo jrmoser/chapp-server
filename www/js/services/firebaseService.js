@@ -18,6 +18,8 @@
     var rooms = ref.child("/rooms");
     var users = ref.child("/users");
 
+    var socket = io.connect('http://localhost:5000');
+
     //Define all variables and functions usable to other controllers
     var fb = this;
     fb.objectRef = $firebaseObject(ref);
