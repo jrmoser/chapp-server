@@ -37,6 +37,7 @@ io.on('connection', function(socket) {
       });
     });
   });
+});
 
 
 var find = function(db, collection, room, callback) {
