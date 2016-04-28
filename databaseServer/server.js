@@ -1,16 +1,26 @@
 var express = require('express');
+var http = require('http');
 var app = express();
-var bodyParser = require('body-parser');
-var fs = require('fs');
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+
 var MongoClient = require('mongodb').MongoClient;
-var assert = require('assert');
 var url = 'mongodb://admin:admin@ds021771.mlab.com:21771/chapp';
+
+var bodyParser = require('body-parser');
+var assert = require('assert');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
+
+
+io.on('connection', function (socket) {
+  console.log("socket opened")
+});
+
 
 var rooms = [];
 
@@ -47,7 +57,7 @@ app.post('/api/rooms', (req, res) => {
   });
 });
 
-var port = process.env.PORT || 5000;
-app.listen(port, function() {
+var port = 5000;
+server.listen(port, function() {
   console.log(`App listening on port ${port}...`);
 });
