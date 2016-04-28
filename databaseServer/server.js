@@ -18,7 +18,6 @@ app.use(bodyParser.json());
 app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
-
 io.on('connection', function(socket) {
   socket.on('roomAdded', function(socketData) {
     MongoClient.connect(url, function(err, db) {
