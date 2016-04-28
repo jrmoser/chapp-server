@@ -58,10 +58,9 @@
         desc: desc,
         face: avatarGen()
       };
-      $http.post('localhost:5000/api/messages', data, config).success(function (res, data){
+      $http.post('localhost:5000/api/messages', data).success(function (res, data){
         socket.emit('room added');
       });
-      fb.objectRef.$save();
     }
 
     function getCurrentMessages() {
