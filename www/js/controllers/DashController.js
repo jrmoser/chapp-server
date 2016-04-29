@@ -9,7 +9,9 @@
 
   function DashController(firebaseData) {
     var dc = this;
-    dc.messages = firebaseData.getGeneralChat();
+    firebaseData.getGeneralChat().then(function(res){
+      dc.messages = res;
+    });
   }
 
 }());

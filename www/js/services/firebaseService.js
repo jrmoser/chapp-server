@@ -18,10 +18,9 @@
     var rooms = ref.child("/rooms");
     var users = ref.child("/users");
 
-    var socket = io.connect('http://localhost:5000');
-
     //Define all variables and functions usable to other controllers
     var fb = this;
+    fb.socket = io.connect('http://localhost:5000');
     fb.objectRef = $firebaseObject(ref);
     fb.rooms = [];
     fb.loggedInUser = {name: '', username: '', uid: '', email: '', profilePic: ''};
@@ -53,9 +52,7 @@
         room: activeRoom(),
         profilePic: fb.loggedInUser.profilePic
       };
-      $http.post('/api/messages', data).success(function (res, data){
-        socket.emit('messageAdded');
-      });
+        fb.socket.emit('messageAdded', data);
     }
 
     function addRoom(name, desc) {
@@ -64,9 +61,7 @@
         desc: desc,
         face: avatarGen()
       };
-      $http.post('/api/rooms', data).success(function (res, data){
-        socket.emit('roomAdded');
-      });
+        fb.socket.emit('roomAdded', data);
     }
 
     function getCurrentMessages() {
@@ -93,8 +88,10 @@
     }
 
     function getGeneralChat() {
-      var temp = messages.child("/General Chat");
-      return $firebaseArray(temp);
+      var url = '/api/messages:General Chat';
+      return $http.get(url).then(function (res){
+        return res.data;
+      });
     }
 
     //User authentication functions
