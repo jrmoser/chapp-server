@@ -26,6 +26,7 @@ io.on('connection', function(socket) {
       add(db, 'rooms', socketData, function() {
         find(db, 'rooms', null, function(data) {
           socket.emit('roomSent', data);
+          socket.broadcast.emit('roomSent', data);
           db.close();
         });
       });
@@ -39,6 +40,7 @@ io.on('connection', function(socket) {
       add(db, 'messages', socketData, function() {
         find(db, 'messages', currRoom, function(data) {
           socket.emit('messageSent', data);
+          socket.broadcast.emit('messageSent', data);
           db.close();
         });
       });
