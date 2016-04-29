@@ -10,10 +10,17 @@
   function ChatsController($scope, $ionicPopup, firebaseData, $http) {
 
     var cc = this;
+    cc.socket = firebaseData.socket;
     cc.addRoom = addRoom;
     cc.addRoomPopup = addRoomPopup;
     cc.loggedIn = firebaseData.loggedInUser.username;
     cc.chatRooms = firebaseData.rooms;
+
+    cc.socket.on('roomSent', function(data){
+      $scope.$apply(function(){
+        cc.chatRooms = data;
+      });
+    });
 
     function addRoom(name, desc) {
       firebaseData.addRoom(name, desc);
