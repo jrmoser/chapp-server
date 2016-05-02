@@ -19,24 +19,34 @@ app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
 io.on('connection', function(socket) {
+  //using sockets here for posting data so that everything is super currentish
   socket.on('roomAdded', function(socketData) {
     MongoClient.connect(url, function(err, db) {
       assert.equal(null, err);
-      find(db, 'rooms', null, function(data) {
-        res.json(data).end();
-        db.close();
+      add(db, 'rooms', socketData, function() {
+        find(db, 'rooms', null, function(data) {
+          socket.emit('roomSent', data);
+          socket.broadcast.emit('roomSent', data);
+          db.close();
+        });
       });
     });
   });
+
   socket.on('messageAdded', function(socketData) {
+    var currRoom = {room: socketData.room}
     MongoClient.connect(url, function(err, db) {
       assert.equal(null, err);
-      find(db, 'messages', socketData, function(data) {
-        res.json(data).end();
-        db.close();
+      add(db, 'messages', socketData, function() {
+        find(db, 'messages', currRoom, function(data) {
+          socket.emit('messageSent', data);
+          socket.broadcast.emit('messageSent', data);
+          db.close();
+        });
       });
     });
   });
+});
 
 
 var find = function(db, collection, room, callback) {
@@ -65,6 +75,19 @@ app.get('/api/rooms', (req, res) => {
   });
 });
 
+app.get('/api/room:room', (req, res) => {
+  var currRoom = {
+    name: req.params.room.slice(1)
+  };
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    find(db, 'rooms', currRoom, function(data) {
+      res.json(data).end();
+      db.close();
+    });
+  });
+});
+
 app.get('/api/messages:room', (req, res) => {
   var currRoom = {
     room: req.params.room.slice(1)
@@ -74,33 +97,6 @@ app.get('/api/messages:room', (req, res) => {
     find(db, 'messages', currRoom, function(data) {
       res.json(data).end();
       db.close();
-    });
-  });
-});
-
-app.post('/api/rooms', (req, res) => {
-  MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
-    add(db, 'rooms', req.body, function() {
-      find(db, 'rooms', null, function(data) {
-        res.json(data).end();
-        db.close();
-      });
-    });
-  });
-});
-
-app.post('/api/messages', (req, res) => {
-  var currRoom = {
-    room: req.body.room
-  };
-  MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
-    add(db, 'messages', req.body, function() {
-      find(db, 'messages', currRoom, function(data) {
-        res.json(data).end();
-        db.close();
-      });
     });
   });
 });
