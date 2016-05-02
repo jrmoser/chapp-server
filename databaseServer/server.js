@@ -33,23 +33,22 @@ passport.deserializeUser(function (id, done) {
 passport.use(new FacebookStrategy({
     clientID: "1670711609863592",
     clientSecret: "ed1fdb35da88505d0542dd1bf0258493",
-    callbackURL: "http://localhost:5000/auth/facebook/callback"
+    callbackURL: "http://localhost:5000/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'photos']
   },
   function (accessToken, refreshToken, profile, done) {
+    console.log(profile);
     var data = {
       "_id" : profile.id,
       "name": profile.displayName,
-      "profileURL": profile.profileUrl,
+      "profileURL": profile.photos ? profile.photos[0].value : './avatars/BlackAvatar.jpg',
       "username": profile.displayName,
       "provider": "facebook"
     };
+    console.log(data);
     MongoClient.connect(url, function (err, db) {
       assert.equal(null, err);
-      db.users.findOne({_id: data._id});
-      add(db, 'users', data, function () {
-        socket.emit('userLoggedIn', data);
-        db.close();
-      });
+      db.collection('users').findOneAndUpdate({_id: data._id}, data, {upsert: true, returnNewDocument: true});
     });
     done(null, profile);
   }
