@@ -123,21 +123,23 @@
 
 
     function FBlogin() {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      return ref.authWithOAuthPopup("facebook", function (error, authData) {
-        if (error) {
-          fb.loginError = true;
-          console.log("Login Failed!", error);
-          fb.errorMessage = error.message;
-        } else {
-          fb.loginError = false;
-          fb.loggedInUser.username = authData.facebook.displayName;
-          fb.loggedInUser.uid = authData.uid;
-          fb.loggedInUser.profilePic = authData.facebook.profileImageURL;
-          console.log("Authenticated successfully with payload:", authData);
-          saveUser(fb.loggedInUser);
-        }
+      return $http.get('/auth/facebook').then(function (res) {
+        return res.data;
       });
+      //return ref.authWithOAuthPopup("facebook", function (error, authData) {
+      //  if (error) {
+      //    fb.loginError = true;
+      //    console.log("Login Failed!", error);
+      //    fb.errorMessage = error.message;
+      //  } else {
+      //    fb.loginError = false;
+      //    fb.loggedInUser.username = authData.facebook.displayName;
+      //    fb.loggedInUser.uid = authData.uid;
+      //    fb.loggedInUser.profilePic = authData.facebook.profileImageURL;
+      //    console.log("Authenticated successfully with payload:", authData);
+      //    saveUser(fb.loggedInUser);
+      //  }
+      //});
     }
 
     function Googlelogin() {
