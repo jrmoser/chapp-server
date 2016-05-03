@@ -30,7 +30,7 @@
     ac.profilePic= "";
     load();
     ac.login = login;
-    ac.FBlogin = FBlogin;
+    // ac.FBlogin = FBlogin;
     ac.Googlelogin = Googlelogin;
     ac.register = register;
     ac.logout = logout;
@@ -80,16 +80,16 @@
     }
 
 
-    function FBlogin() {
-      console.log('FB Login');
-      firebaseData.FBlogin().then(function () {
-        ac.username = firebaseData.loggedInUser.username;
-        ac.profilePic = firebaseData.loggedInUser.profilePic;
-        $timeout(function () {
-          ac.state = "loggedin";
-        });
-      });
-    }
+    // function FBlogin() {
+    //   console.log('FB Login');
+    //   firebaseData.FBlogin().then(function () {
+    //     ac.username = firebaseData.loggedInUser.username;
+    //     ac.profilePic = firebaseData.loggedInUser.profilePic;
+    //     $timeout(function () {
+    //       ac.state = "loggedin";
+    //     });
+    //   });
+    // }
 
     function Googlelogin() {
       console.log('Google Login');
