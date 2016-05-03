@@ -20,7 +20,7 @@
 
     //Define all variables and functions usable to other controllers
     var fb = this;
-    fb.socket = io.connect('http://localhost:5000');
+    fb.socket = io.connect('http://10.0.112.172:5000');
     fb.objectRef = $firebaseObject(ref);
     fb.rooms = [];
     fb.loggedInUser = {name: '', username: '', uid: '', email: '', profilePic: ''};
@@ -32,7 +32,7 @@
     fb.getCurrentRoom = getCurrentRoom;
     fb.addRoom = addRoom;
     fb.login = login;
-    fb.FBlogin = FBlogin;
+    // fb.FBlogin = FBlogin;
     fb.Googlelogin = Googlelogin;
     fb.register = register;
     fb.logout = logout;
@@ -121,24 +121,14 @@
       });
     }
 
-
-    function FBlogin() {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      return ref.authWithOAuthPopup("facebook", function (error, authData) {
-        if (error) {
-          fb.loginError = true;
-          console.log("Login Failed!", error);
-          fb.errorMessage = error.message;
-        } else {
-          fb.loginError = false;
-          fb.loggedInUser.username = authData.facebook.displayName;
-          fb.loggedInUser.uid = authData.uid;
-          fb.loggedInUser.profilePic = authData.facebook.profileImageURL;
-          console.log("Authenticated successfully with payload:", authData);
-          saveUser(fb.loggedInUser);
-        }
-      });
-    }
+    fb.socket.once('userLoggedIn', function(data){
+         fb.loginError = false;
+         fb.loggedInUser.username = data.username;
+         fb.loggedInUser.uid = data._id;
+         fb.loggedInUser.profilePic = data.profileURL;
+         console.log("Authenticated successfully with payload:", data);
+         saveUser(fb.loggedInUser);
+    })
 
     function Googlelogin() {
       var ref = new Firebase("https://firechatmlatc.firebaseio.com");
@@ -213,8 +203,6 @@
     }
 
     function logout() {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      ref.unauth();
       fb.loggedInUser = {name: '', username: '', uid: '', email: ''};
       delete $localStorage.loggedInUser;
       console.log("User was logged out!");
