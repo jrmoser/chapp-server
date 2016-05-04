@@ -1,39 +1,31 @@
 var express = require('express');
-var http = require('http');
 var app = express();
-var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+//passport garbage
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var GoogleStrategy = require('passport-google-oauth').Strategy;
+//socket garbage
+var http = require('http');
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+//mongo garbage
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://admin:admin@ds021771.mlab.com:21771/chapp';
-
-var bodyParser = require('body-parser');
 var assert = require('assert');
 
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+app.use(session({ secret: 'cookie monster',resave: false, saveUninitialized: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
-
-passport.serializeUser(function (user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function (id, done) {
-  MongoClient.connect(url, function (err, db) {
-    assert.equal(null, err);
-    var user = db.collection('users').find({_id: id});
-    console.log(user);
-    done(err, user);
-  });
-});
 
 passport.use(new FacebookStrategy({
     clientID: "1670711609863592",
@@ -56,11 +48,27 @@ passport.use(new FacebookStrategy({
   }
 ));
 
+
+passport.serializeUser(function (user, done) {
+  console.log(user);
+  done(null, user);
+});
+
+var i = 1;
+
+passport.deserializeUser(function (user, done) {
+  console.log(user);
+  console.log(i);
+  i++;
+  done(null, user);
+});
+
+
 app.get('/auth/facebook', passport.authenticate('facebook'));
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', {
     successRedirect: '/#/tab/account',
-    failureRedirect: '/#/tab/account'
+    failureRedirect: '/'
   })
 );
 
@@ -119,6 +127,11 @@ app.get('/api/rooms', (req, res) => {
       db.close();
     });
   });
+});
+
+app.get('/user', (req, res) => {
+  console.log(req.user);
+    res.json(req.user);
 });
 
 app.get('/api/room:room', (req, res) => {
