@@ -20,7 +20,7 @@
 
     //Define all variables and functions usable to other controllers
     var fb = this;
-    fb.socket = io.connect('http://localhost:5000');
+    fb.socket = io.connect('http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com:5000');
     fb.objectRef = $firebaseObject(ref);
     fb.rooms = [];
     fb.loggedInUser = {name: '', username: '', uid: '', email: '', profilePic: ''};

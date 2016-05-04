@@ -29,7 +29,7 @@ app.use('/node_modules', express.static(__dirname + '/node_modules'));
 passport.use(new FacebookStrategy({
     clientID: "1670711609863592",
     clientSecret: "ed1fdb35da88505d0542dd1bf0258493",
-    callbackURL: "http://10.0.112.172:5000/auth/facebook/callback",
+    callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/facebook/callback",
     profileFields: ['id', 'displayName', 'photos']
   },
   function (accessToken, refreshToken, profile, done) {
