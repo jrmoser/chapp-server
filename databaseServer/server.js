@@ -21,7 +21,6 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(session({ secret: 'cookie monster',resave: false, saveUninitialized: true }));
-app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', express.static(__dirname + '/../www'));
@@ -50,27 +49,40 @@ passport.use(new FacebookStrategy({
 
 
 passport.serializeUser(function (user, done) {
-  console.log(user);
+  // console.log(user);
   done(null, user);
 });
 
 var i = 1;
 
 passport.deserializeUser(function (user, done) {
-  console.log(user);
+  // console.log(user);
   console.log(i);
   i++;
   done(null, user);
 });
 
+app.get('/user', (req, res) => {
+  console.log(req.user);
+    res.json(req.user);
+});
 
 app.get('/auth/facebook', passport.authenticate('facebook'));
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {
-    successRedirect: '/#/tab/account',
-    failureRedirect: '/'
-  })
-);
+app.get('/auth/facebook/callback',function(req, res, next) {
+	passport.authenticate('facebook', function(err, user, info) {
+		console.log(err, user, info);
+		// req.login() will save user object to session
+		req.login(user, (error) => {
+			if (error) {
+				console.log('error login', error);
+				res.redirect('/');
+			} else {
+				console.log('login success', user);
+				res.redirect('/#/tab/account');
+			}
+		});
+	})(req, res, next);
+});
 
 io.on('connection', function (socket) {
   //using sockets here for posting data so that everything is super currentish
@@ -129,10 +141,6 @@ app.get('/api/rooms', (req, res) => {
   });
 });
 
-app.get('/user', (req, res) => {
-  console.log(req.user);
-    res.json(req.user);
-});
 
 app.get('/api/room:room', (req, res) => {
   var currRoom = {
