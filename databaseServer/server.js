@@ -1,44 +1,36 @@
 var express = require('express');
-var http = require('http');
 var app = express();
-var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+//passport garbage
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
-var GoogleStrategy = require('passport-google-oauth').Strategy;
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+//socket garbage
+var http = require('http');
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+//mongo garbage
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://admin:admin@ds021771.mlab.com:21771/chapp';
-
-var bodyParser = require('body-parser');
 var assert = require('assert');
 
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(session({ secret: 'cookie monster',resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', express.static(__dirname + '/../www'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
-passport.serializeUser(function (user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function (id, done) {
-  MongoClient.connect(url, function (err, db) {
-    assert.equal(null, err);
-    var user = db.collection('users').find({_id: id});
-    console.log(user);
-    done(err, user);
-  });
-});
-
 passport.use(new FacebookStrategy({
     clientID: "1670711609863592",
     clientSecret: "ed1fdb35da88505d0542dd1bf0258493",
-    callbackURL: "http://10.0.112.172:5000/auth/facebook/callback",
+    callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/facebook/callback",
+    // callbackURL: "http://localhost:5000/auth/facebook/callback",
     profileFields: ['id', 'displayName', 'photos']
   },
   function (accessToken, refreshToken, profile, done) {
@@ -56,13 +48,95 @@ passport.use(new FacebookStrategy({
   }
 ));
 
-app.get('/auth/facebook', passport.authenticate('facebook'));
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {
-    successRedirect: '/#/tab/account',
-    failureRedirect: '/#/tab/account'
-  })
+passport.use(new GoogleStrategy({
+    clientID: "562875444406-gqas93nneaqf2gd8vnrjv1eraabdfotc.apps.googleusercontent.com",
+    clientSecret: "460DzrGqfELLVobc3eojraRC",
+    callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/google/callback",
+    // callbackURL: "http://localhost:5000/auth/google/callback",
+    // profileFields: ['id', 'displayName', 'photos']
+  },
+  function (accessToken, refreshToken, profile, done) {
+    console.log(profile);
+    var data = {
+      "_id" : profile.id,
+      "profileURL": profile._json ? profile._json['picture'] : './avatars/BlackAvatar.jpg',
+      "username": profile.displayName,
+      "provider": "google"
+    };
+    MongoClient.connect(url, function (err, db) {
+      assert.equal(null, err);
+      db.collection('users').findOneAndUpdate({_id: data._id}, data, {upsert: true, returnNewDocument: true});
+    });
+    done(null, profile);
+  }
+));
+
+
+passport.serializeUser(function (user, done) {
+  // console.log(user);
+  done(null, user.id);
+});
+
+var i = 1;
+
+passport.deserializeUser(function (id, done) {
+  // console.log(user);
+  var search = { _id : id }
+  console.log(i);
+  i++;
+  MongoClient.connect(url, function (err, db) {
+    assert.equal(null, err);
+    find(db, 'users', search, function(data){
+      done(null, data[0]);
+      db.close();
+    })
+  });
+});
+
+app.get('/user', (req, res) => {
+  console.log(req.user);
+    res.json(req.user);
+});
+
+app.get('/user/logout', (req, res) => {
+  req.logout();
+  res.redirect('/#/tab/account');
+}
 );
+
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook/callback',function(req, res, next) {
+	passport.authenticate('facebook', function(err, user, info) {
+		console.log(err, user, info);
+		// req.login() will save user object to session
+		req.login(user, (error) => {
+			if (error) {
+				console.log('error login', error);
+				res.redirect('/');
+			} else {
+				console.log('login success', user);
+				res.redirect('/#/tab/account');
+			}
+		});
+	})(req, res, next);
+});
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
+app.get('/auth/google/callback',function(req, res, next) {
+	passport.authenticate('google', function(err, user, info) {
+		console.log(err, user, info);
+		// req.login() will save user object to session
+		req.login(user, (error) => {
+			if (error) {
+				console.log('error login', error);
+				res.redirect('/');
+			} else {
+				console.log('login success', user);
+				res.redirect('/#/tab/account');
+			}
+		});
+	})(req, res, next);
+});
 
 io.on('connection', function (socket) {
   //using sockets here for posting data so that everything is super currentish
@@ -120,6 +194,7 @@ app.get('/api/rooms', (req, res) => {
     });
   });
 });
+
 
 app.get('/api/room:room', (req, res) => {
   var currRoom = {
