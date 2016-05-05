@@ -20,7 +20,7 @@
 
     //Define all variables and functions usable to other controllers
     var fb = this;
-    fb.socket = io.connect('http://10.0.112.172:5000');
+    fb.socket = io.connect('http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com:5000');
     fb.objectRef = $firebaseObject(ref);
     fb.rooms = [];
     fb.loggedInUser = {name: '', username: '', uid: '', email: '', profilePic: ''};
@@ -32,7 +32,7 @@
     fb.getCurrentRoom = getCurrentRoom;
     fb.addRoom = addRoom;
     fb.login = login;
-    // fb.FBlogin = FBlogin;
+    fb.FBlogin = FBlogin;
     fb.Googlelogin = Googlelogin;
     fb.register = register;
     fb.logout = logout;
@@ -121,14 +121,16 @@
       });
     }
 
-    fb.socket.once('userLoggedIn', function(data){
-         fb.loginError = false;
-         fb.loggedInUser.username = data.username;
-         fb.loggedInUser.uid = data._id;
-         fb.loggedInUser.profilePic = data.profileURL;
-         console.log("Authenticated successfully with payload:", data);
-         saveUser(fb.loggedInUser);
-    })
+    function FBlogin() {
+      return $http.get('/user').then(function (res) {
+        fb.loginError = false;
+        fb.loggedInUser.username = res.data.displayName;
+        fb.loggedInUser.uid = res.data.id;
+        fb.loggedInUser.profilePic = res.data.photos[0].value;
+        console.log("Authenticated successfully with payload:", res.data);
+        saveUser(fb.loggedInUser);
+      });
+    }
 
     function Googlelogin() {
       var ref = new Firebase("https://firechatmlatc.firebaseio.com");
@@ -203,6 +205,8 @@
     }
 
     function logout() {
+      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
+      ref.unauth();
       fb.loggedInUser = {name: '', username: '', uid: '', email: ''};
       delete $localStorage.loggedInUser;
       console.log("User was logged out!");
