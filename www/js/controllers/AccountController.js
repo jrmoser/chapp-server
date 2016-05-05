@@ -28,56 +28,56 @@
     var ac = this;
 
     ac.profilePic= "";
-    load();
-    ac.login = login;
+    // load();
+    // ac.login = login;
     ac.FBlogin = FBlogin;
-    ac.Googlelogin = Googlelogin;
-    ac.register = register;
+    // ac.Googlelogin = Googlelogin;
+    // ac.register = register;
     ac.logout = logout;
     ac.loginError = false;
     ac.registerError = false;
     ac.errorMessage = ":'(";
 
-
-    function load() {
-      if (firebaseData.loggedInUser.username == '') {
-        ac.state = "login";
-        ac.username = "";
-        ac.profilePic = "";
-        //console.log("Not logged in :(");
-      }
-      else {
-        //console.log("Already logged in :)");
-        ac.state = "loggedin";
-        ac.username = firebaseData.loggedInUser.username;
-        ac.profilePic = firebaseData.loggedInUser.profilePic;
-        console.log("Logged in as " + ac.username);
-      }
-    }
-
-    function login(email, password) {
-      firebaseData.login(email, password)
-        .then(function () {
-          if (firebaseData.loginError == true) {
-            ac.loginError = true;
-            // :'(
-          }
-          else {
-            ac.loginError = false;
-            ac.username = firebaseData.loggedInUser.username;
-            ac.profilePic = firebaseData.loggedInUser.profilePic;
-            $timeout(function () {
-              ac.state = "loggedin";
-            });
-          }
-        }, function () {
-          console.log("ERROR ERROR ERROR");
-          ac.errorMessage = firebaseData.errorMessage;
-          ac.loginError = true;
-          $scope.$apply();
-        });
-
-    }
+    //
+    // function load() {
+    //   if (firebaseData.loggedInUser.username == '') {
+    //     ac.state = "login";
+    //     ac.username = "";
+    //     ac.profilePic = "";
+    //     //console.log("Not logged in :(");
+    //   }
+    //   else {
+    //     //console.log("Already logged in :)");
+    //     ac.state = "loggedin";
+    //     ac.username = firebaseData.loggedInUser.username;
+    //     ac.profilePic = firebaseData.loggedInUser.profilePic;
+    //     console.log("Logged in as " + ac.username);
+    //   }
+    // }
+    //
+    // function login(email, password) {
+    //   firebaseData.login(email, password)
+    //     .then(function () {
+    //       if (firebaseData.loginError == true) {
+    //         ac.loginError = true;
+    //         // :'(
+    //       }
+    //       else {
+    //         ac.loginError = false;
+    //         ac.username = firebaseData.loggedInUser.username;
+    //         ac.profilePic = firebaseData.loggedInUser.profilePic;
+    //         $timeout(function () {
+    //           ac.state = "loggedin";
+    //         });
+    //       }
+    //     }, function () {
+    //       console.log("ERROR ERROR ERROR");
+    //       ac.errorMessage = firebaseData.errorMessage;
+    //       ac.loginError = true;
+    //       $scope.$apply();
+    //     });
+    //
+    // }
 
 
     function FBlogin() {
@@ -86,43 +86,43 @@
         ac.username = firebaseData.loggedInUser.username;
         ac.profilePic = firebaseData.loggedInUser.profilePic;
         $timeout(function () {
-          ac.state = "loggedin";
+          ac.state = ac.username ? "loggedin" : "login";
         });
       });
     }
+    //
+    // function Googlelogin() {
+    //   console.log('Google Login');
+    //   firebaseData.Googlelogin().then(function () {
+    //     ac.username = firebaseData.loggedInUser.username;
+    //     ac.profilePic = firebaseData.loggedInUser.profilePic;
+    //     $timeout(function () {
+    //       ac.state = "loggedin";
+    //     });
+    //   });
+    // }
 
-    function Googlelogin() {
-      console.log('Google Login');
-      firebaseData.Googlelogin().then(function () {
-        ac.username = firebaseData.loggedInUser.username;
-        ac.profilePic = firebaseData.loggedInUser.profilePic;
-        $timeout(function () {
-          ac.state = "loggedin";
-        });
-      });
-    }
-
-
-    function register(firstname, lastname, email, username, password) {
-      firebaseData.register(firstname, lastname, email, username, password)
-        .then(function () {
-          if (firebaseData.registerError == true) {
-            ac.registerError = true;
-            // :'(
-          }
-          else {
-            login(email, password);
-          }
-
-        }, function () {
-          ac.errorMessage = firebaseData.errorMessage;
-          console.log(ac.errorMessage);
-          ac.registerError = true;
-          $scope.$apply();
-        });
-      //ac.state = "loggedin";
-      //ac.loggedInUser = firebaseData.loggedInUser.username;
-    }
+    //
+    // function register(firstname, lastname, email, username, password) {
+    //   firebaseData.register(firstname, lastname, email, username, password)
+    //     .then(function () {
+    //       if (firebaseData.registerError == true) {
+    //         ac.registerError = true;
+    //         // :'(
+    //       }
+    //       else {
+    //         login(email, password);
+    //       }
+    //
+    //     }, function () {
+    //       ac.errorMessage = firebaseData.errorMessage;
+    //       console.log(ac.errorMessage);
+    //       ac.registerError = true;
+    //       $scope.$apply();
+    //     });
+    //   //ac.state = "loggedin";
+    //   //ac.loggedInUser = firebaseData.loggedInUser.username;
+    // }
 
     function logout() {
       firebaseData.logout();

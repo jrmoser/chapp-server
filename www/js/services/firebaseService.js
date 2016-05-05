@@ -13,15 +13,16 @@
   function firebaseData($firebaseArray, $location, $firebaseObject, $localStorage, $http, $q) {
 
     //put firebase at the top to be used in declarations area
-    var ref = new Firebase("https://firechatmlatc.firebaseio.com/");
-    var messages = ref.child("/messages");
-    var rooms = ref.child("/rooms");
-    var users = ref.child("/users");
+    // var ref = new Firebase("https://firechatmlatc.firebaseio.com/");
+    // var messages = ref.child("/messages");
+    // var rooms = ref.child("/rooms");
+    // var users = ref.child("/users");
 
     //Define all variables and functions usable to other controllers
     var fb = this;
     fb.socket = io.connect('http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com:5000');
-    fb.objectRef = $firebaseObject(ref);
+    // fb.socket = io.connect('http://localhost:5000');
+    // fb.objectRef = $firebaseObject(ref);
     fb.rooms = [];
     fb.loggedInUser = {name: '', username: '', uid: '', email: '', profilePic: ''};
     fb.loginError = false;
@@ -31,10 +32,10 @@
     fb.getCurrentMessages = getCurrentMessages;
     fb.getCurrentRoom = getCurrentRoom;
     fb.addRoom = addRoom;
-    fb.login = login;
+    // fb.login = login;
     fb.FBlogin = FBlogin;
-    fb.Googlelogin = Googlelogin;
-    fb.register = register;
+    // fb.Googlelogin = Googlelogin;
+    // fb.register = register;
     fb.logout = logout;
     fb.loadUser = loadUser;
     fb.getGeneralChat = getGeneralChat;
@@ -95,93 +96,97 @@
     }
 
     //User authentication functions
-    function login(email, password) {
-      //Authenticates user by email and password
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      return ref.authWithPassword({
-        email: email,
-        password: password
-      }, function (error, authData) {
-        if (error) {
-          console.log("You broke it");
-          fb.loginError = true;
-          console.log("Login Failed!", error);
-          fb.errorMessage = error.message;
-        } else {
-          fb.loginError = false;
-          fb.loggedInUser.email = authData.password.email;
-          fb.loggedInUser.uid = authData.uid;
-          fb.loggedInUser.username = fb.objectRef.users[authData.uid].username;
-          fb.loggedInUser.name = fb.objectRef.users[authData.uid].name;
-          fb.loggedInUser.profilePic = fb.objectRef.users[authData.uid].profileURL;
-          saveUser(fb.loggedInUser);
-          console.log("Logged in as " + fb.loggedInUser.username + ": Firebase Service");
-
-        }
-      });
-    }
+    // function login(email, password) {
+    //   //Authenticates user by email and password
+    //   var ref = new Firebase("https://firechatmlatc.firebaseio.com");
+    //   return ref.authWithPassword({
+    //     email: email,
+    //     password: password
+    //   }, function (error, authData) {
+    //     if (error) {
+    //       console.log("You broke it");
+    //       fb.loginError = true;
+    //       console.log("Login Failed!", error);
+    //       fb.errorMessage = error.message;
+    //     } else {
+    //       fb.loginError = false;
+    //       fb.loggedInUser.email = authData.password.email;
+    //       fb.loggedInUser.uid = authData.uid;
+    //       fb.loggedInUser.username = fb.objectRef.users[authData.uid].username;
+    //       fb.loggedInUser.name = fb.objectRef.users[authData.uid].name;
+    //       fb.loggedInUser.profilePic = fb.objectRef.users[authData.uid].profileURL;
+    //       saveUser(fb.loggedInUser);
+    //       console.log("Logged in as " + fb.loggedInUser.username + ": Firebase Service");
+    //
+    //     }
+    //   });
+    // }
 
     function FBlogin() {
       return $http.get('/user').then(function (res) {
-        fb.loginError = false;
-        fb.loggedInUser.username = res.data.displayName;
-        fb.loggedInUser.uid = res.data.id;
-        fb.loggedInUser.profilePic = res.data.photos[0].value;
-        console.log("Authenticated successfully with payload:", res.data);
-        saveUser(fb.loggedInUser);
-      });
-    }
-
-    function Googlelogin() {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      return ref.authWithOAuthPopup("google", function (error, authData) {
-        if (error) {
-          fb.loginError = true;
-          console.log("Login Failed!", error);
-          fb.errorMessage = error.message;
-        } else {
+        if (res.data) {
           fb.loginError = false;
-          fb.loggedInUser.username = authData.google.displayName;
-          fb.loggedInUser.uid = authData.uid;
-          fb.loggedInUser.profilePic = authData.google.profileImageURL;
-          console.log("Authenticated successfully with payload:", authData);
-          saveUser(fb.loggedInUser);
+          fb.loggedInUser.username = res.data.username;
+          fb.loggedInUser.uid = res.data._id;
+          fb.loggedInUser.profilePic = res.data.profileURL;
+          console.log("Authenticated successfully with payload:", res.data);
+        } else {
+          fb.loginError = true;
         }
+        // saveUser(fb.loggedInUser);
       });
     }
-
-    function register(firstname, lastname, email, username, password) {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com/users");
-      return ref.createUser(
-        {
-          email: email,
-          password: password
-
-        }, function (error, userData) {
-          if (error) {
-            fb.registerError = true;
-            console.log("Error creating user:" + error);
-            fb.errorMessage = error.message;
-          } else {
-            fb.registerError = false;
-            console.log("Successfully created user account with uid:", userData.uid);
-            var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-            ref.authWithPassword({
-              email: email,
-              password: password
-            }).then(function () {
-              ref = new Firebase("https://firechatmlatc.firebaseio.com/users/" + userData.uid);
-              ref.set(
-                {
-                  username: username,
-                  name: firstname + " " + lastname,
-                  profileURL: avatarGen()
-                }
-              );
-            });
-          }
-        });
-    }
+    //
+    // function Googlelogin() {
+    //   var ref = new Firebase("https://firechatmlatc.firebaseio.com");
+    //   return ref.authWithOAuthPopup("google", function (error, authData) {
+    //     if (error) {
+    //       fb.loginError = true;
+    //       console.log("Login Failed!", error);
+    //       fb.errorMessage = error.message;
+    //     } else {
+    //       fb.loginError = false;
+    //       fb.loggedInUser.username = authData.google.displayName;
+    //       fb.loggedInUser.uid = authData.uid;
+    //       fb.loggedInUser.profilePic = authData.google.profileImageURL;
+    //       console.log("Authenticated successfully with payload:", authData);
+    //       saveUser(fb.loggedInUser);
+    //     }
+    //   });
+    // }
+    //
+    // function register(firstname, lastname, email, username, password) {
+    //   var ref = new Firebase("https://firechatmlatc.firebaseio.com/users");
+    //   return ref.createUser(
+    //     {
+    //       email: email,
+    //       password: password
+    //
+    //     }, function (error, userData) {
+    //       if (error) {
+    //         fb.registerError = true;
+    //         console.log("Error creating user:" + error);
+    //         fb.errorMessage = error.message;
+    //       } else {
+    //         fb.registerError = false;
+    //         console.log("Successfully created user account with uid:", userData.uid);
+    //         var ref = new Firebase("https://firechatmlatc.firebaseio.com");
+    //         ref.authWithPassword({
+    //           email: email,
+    //           password: password
+    //         }).then(function () {
+    //           ref = new Firebase("https://firechatmlatc.firebaseio.com/users/" + userData.uid);
+    //           ref.set(
+    //             {
+    //               username: username,
+    //               name: firstname + " " + lastname,
+    //               profileURL: avatarGen()
+    //             }
+    //           );
+    //         });
+    //       }
+    //     });
+    // }
 
     function avatarGen() {
       var x = Math.floor((Math.random() * 5));
@@ -205,11 +210,12 @@
     }
 
     function logout() {
-      var ref = new Firebase("https://firechatmlatc.firebaseio.com");
-      ref.unauth();
       fb.loggedInUser = {name: '', username: '', uid: '', email: ''};
-      delete $localStorage.loggedInUser;
       console.log("User was logged out!");
+      return $http.get('/user/logout')
+      // var ref = new Firebase("https://firechatmlatc.firebaseio.com");
+      // ref.unauth();
+      // delete $localStorage.loggedInUser;
     }
 
     function saveUser(userdata) {
