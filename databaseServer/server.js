@@ -30,13 +30,12 @@ passport.use(new FacebookStrategy({
     clientID: "1670711609863592",
     clientSecret: "ed1fdb35da88505d0542dd1bf0258493",
     callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/facebook/callback",
-    // callbackURL: "http://localhost:5000/auth/facebook/callback",
     profileFields: ['id', 'displayName', 'photos']
   },
   function (accessToken, refreshToken, profile, done) {
     var data = {
       "_id" : profile.id,
-      "profileURL": profile.photos ? profile.photos[0].value : './avatars/BlackAvatar.jpg',
+      "profileURL": profile.photos ? profile.photos[0].value : avatarGen(),
       "username": profile.displayName,
       "provider": "facebook"
     };
@@ -52,8 +51,6 @@ passport.use(new GoogleStrategy({
     clientID: "562875444406-gqas93nneaqf2gd8vnrjv1eraabdfotc.apps.googleusercontent.com",
     clientSecret: "460DzrGqfELLVobc3eojraRC",
     callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/google/callback",
-    // callbackURL: "http://localhost:5000/auth/google/callback",
-    // profileFields: ['id', 'displayName', 'photos']
   },
   function (accessToken, refreshToken, profile, done) {
     console.log(profile);
@@ -71,19 +68,12 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-
 passport.serializeUser(function (user, done) {
-  // console.log(user);
   done(null, user.id);
 });
 
-var i = 1;
-
 passport.deserializeUser(function (id, done) {
-  // console.log(user);
   var search = { _id : id }
-  console.log(i);
-  i++;
   MongoClient.connect(url, function (err, db) {
     assert.equal(null, err);
     find(db, 'users', search, function(data){
@@ -221,6 +211,29 @@ app.get('/api/messages:room', (req, res) => {
     });
   });
 });
+
+//random avatar generator for if they don't have a picture from facebook or google
+function avatarGen() {
+  var x = Math.floor((Math.random() * 5));
+  var avatar = '';
+  if (x === 0) {
+    avatar = './avatars/OrangeAvatar.png';
+  }
+  else if (x === 1) {
+    avatar = './avatars/BlueAvatar.png';
+  }
+  else if (x === 2) {
+    avatar = './avatars/RedAvatar.png';
+  }
+  else if (x === 3) {
+    avatar = './avatars/YellowAvatar.png';
+  }
+  else if (x === 4) {
+    avatar = './avatars/BlackAvatar.jpg';
+  }
+  return avatar;
+}
+
 
 
 var port = 5000;
