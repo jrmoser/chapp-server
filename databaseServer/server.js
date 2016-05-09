@@ -7,7 +7,7 @@ var session = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
-var GoogleStrategy = require('passport-google-oauth').Strategy;
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 //socket garbage
 var http = require('http');
 var server = http.createServer(app);
@@ -35,7 +35,7 @@ passport.use(new FacebookStrategy({
   function (accessToken, refreshToken, profile, done) {
     var data = {
       "_id" : profile.id,
-      "profileURL": profile.photos ? profile.photos[0].value : './avatars/BlackAvatar.jpg',
+      "profileURL": profile.photos ? profile.photos[0].value : avatarGen(),
       "username": profile.displayName,
       "provider": "facebook"
     };
@@ -47,19 +47,40 @@ passport.use(new FacebookStrategy({
   }
 ));
 
+passport.use(new GoogleStrategy({
+    clientID: "562875444406-gqas93nneaqf2gd8vnrjv1eraabdfotc.apps.googleusercontent.com",
+    clientSecret: "460DzrGqfELLVobc3eojraRC",
+    callbackURL: "http://ec2-54-186-218-180.us-west-2.compute.amazonaws.com/auth/google/callback",
+  },
+  function (accessToken, refreshToken, profile, done) {
+    console.log(profile);
+    var data = {
+      "_id" : profile.id,
+      "profileURL": profile._json ? profile._json['picture'] : './avatars/BlackAvatar.jpg',
+      "username": profile.displayName,
+      "provider": "google"
+    };
+    MongoClient.connect(url, function (err, db) {
+      assert.equal(null, err);
+      db.collection('users').findOneAndUpdate({_id: data._id}, data, {upsert: true, returnNewDocument: true});
+    });
+    done(null, profile);
+  }
+));
 
 passport.serializeUser(function (user, done) {
-  // console.log(user);
-  done(null, user);
+  done(null, user.id);
 });
 
-var i = 1;
-
-passport.deserializeUser(function (user, done) {
-  // console.log(user);
-  console.log(i);
-  i++;
-  done(null, user);
+passport.deserializeUser(function (id, done) {
+  var search = { _id : id }
+  MongoClient.connect(url, function (err, db) {
+    assert.equal(null, err);
+    find(db, 'users', search, function(data){
+      done(null, data[0]);
+      db.close();
+    })
+  });
 });
 
 app.get('/user', (req, res) => {
@@ -67,9 +88,32 @@ app.get('/user', (req, res) => {
     res.json(req.user);
 });
 
+app.get('/user/logout', (req, res) => {
+  req.logout();
+  res.redirect('/#/tab/account');
+}
+);
+
 app.get('/auth/facebook', passport.authenticate('facebook'));
 app.get('/auth/facebook/callback',function(req, res, next) {
 	passport.authenticate('facebook', function(err, user, info) {
+		console.log(err, user, info);
+		// req.login() will save user object to session
+		req.login(user, (error) => {
+			if (error) {
+				console.log('error login', error);
+				res.redirect('/');
+			} else {
+				console.log('login success', user);
+				res.redirect('/#/tab/account');
+			}
+		});
+	})(req, res, next);
+});
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
+app.get('/auth/google/callback',function(req, res, next) {
+	passport.authenticate('google', function(err, user, info) {
 		console.log(err, user, info);
 		// req.login() will save user object to session
 		req.login(user, (error) => {
@@ -167,6 +211,29 @@ app.get('/api/messages:room', (req, res) => {
     });
   });
 });
+
+//random avatar generator for if they don't have a picture from facebook or google
+function avatarGen() {
+  var x = Math.floor((Math.random() * 5));
+  var avatar = '';
+  if (x === 0) {
+    avatar = './avatars/OrangeAvatar.png';
+  }
+  else if (x === 1) {
+    avatar = './avatars/BlueAvatar.png';
+  }
+  else if (x === 2) {
+    avatar = './avatars/RedAvatar.png';
+  }
+  else if (x === 3) {
+    avatar = './avatars/YellowAvatar.png';
+  }
+  else if (x === 4) {
+    avatar = './avatars/BlackAvatar.jpg';
+  }
+  return avatar;
+}
+
 
 
 var port = 5000;
